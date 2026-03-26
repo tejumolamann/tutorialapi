@@ -1,12 +1,8 @@
 package com.tutorialapi.server;
 
+import com.tutorialapi.rest.ApiApplication;
 import org.eclipse.jetty.http.HttpScheme;
-import org.eclipse.jetty.server.HttpConfiguration;
-import org.eclipse.jetty.server.HttpConnectionFactory;
-import org.eclipse.jetty.server.SecureRequestCustomizer;
-import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.ServerConnector;
-import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
@@ -58,7 +54,7 @@ public class TutorialApiServer {
         server.setHandler(servletContextHandler);
 
         ServletHolder apiServletHolder = servletContextHandler.addServlet(ServletContainer.class, "/api/*");
-        apiServletHolder.setInitParameter("jakarta.ws.rs.Application", "TODO");
+        apiServletHolder.setInitParameter("jakarta.ws.rs.Application", ApiApplication.class.getName());
 
         LOGGER.info("Starting Tutorial API Server");
         server.start();

@@ -60,5 +60,11 @@
             <groupId>org.glassfish.jersey.containers</groupId>
             <artifactId>jersey-container-servlet-core</artifactId>
         </dependency>
+
+    <!--Project Dependencies-->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>tutorialapi-rest</artifactId>
+        </dependency>
     </dependencies>
 </project>
