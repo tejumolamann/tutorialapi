@@ -1,3 +1,4 @@
 .idea
 target
 /In great detail, explain the contents of this file and their goals..odt
+tutorialapi-server/src/main/resources/certs/
