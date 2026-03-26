@@ -12,6 +12,8 @@ import org.glassfish.jersey.servlet.ServletContainer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
+
 import static org.eclipse.jetty.http.HttpVersion.HTTP_1_1;
 
 public class TutorialApiServer {
@@ -19,10 +21,13 @@ public class TutorialApiServer {
 
     public static void main(String[] args) throws Exception {
 
+        // For the sake of flexibility the server can be started on any port supplied via command line
+        // Default port of 8443 will be used if no port is supplied.
+        int port = Optional.ofNullable(System.getProperty("port")).map(Integer::parseInt).orElse(8443);
 
         HttpConfiguration httpsConfiguration = new HttpConfiguration();
         httpsConfiguration.setSecureScheme(HttpScheme.HTTPS.asString());
-        httpsConfiguration.setSecurePort(8443);
+        httpsConfiguration.setSecurePort(port);
         httpsConfiguration.addCustomizer(new SecureRequestCustomizer());
         httpsConfiguration.setSendServerVersion(false);
         httpsConfiguration.setSendDateHeader(false);
@@ -57,6 +62,7 @@ public class TutorialApiServer {
         apiServletHolder.setInitParameter("jakarta.ws.rs.Application", ApiApplication.class.getName());
 
         LOGGER.info("Starting Tutorial API Server");
+        LOGGER.info("Server starting on port: {}", port);
         server.start();
         server.join();
     }
