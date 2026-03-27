@@ -66,5 +66,11 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>tutorialapi-rest</artifactId>
         </dependency>
+
+        <dependency>
+        <!--Used for loading system configuration-->
+            <groupId>com.typesafe</groupId>
+            <artifactId>config</artifactId>
+        </dependency>
     </dependencies>
 </project>
