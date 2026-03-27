@@ -1,8 +1,6 @@
 package com.tutorialapi.server.config;
 
-import java.util.Locale;
-
-public enum SystemKey {
+public enum SystemKey implements Key{
     PORT("8443"),
     MODE("dev");
 
@@ -14,9 +12,5 @@ public enum SystemKey {
 
     public String getDefaultValue() {
         return defaultValue;
-    }
-
-    public String getKey() {
-        return name().toLowerCase(Locale.ENGLISH).replace("_", ".");
     }
 }
