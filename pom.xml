@@ -82,6 +82,13 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <dependency>
+            <!--This fixes an WADL issue-->
+                <groupId>org.glassfish.jaxb</groupId>
+                <artifactId>jaxb-runtime</artifactId>
+                <version>3.0.2</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -100,6 +107,8 @@
                             <ignoredUnusedDeclaredDependency>jakarta.annotation:jakarta.annotation-api</ignoredUnusedDeclaredDependency>
                             <ignoredUnusedDeclaredDependency>org.eclipse.jetty:jetty-annotations</ignoredUnusedDeclaredDependency>
                             <ignoredUnusedDeclaredDependency>org.glassfish.jersey.inject:jersey-hk2</ignoredUnusedDeclaredDependency>
+                            <ignoredUnusedDeclaredDependency>org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-jetty</ignoredUnusedDeclaredDependency>
+                            <ignoredUnusedDeclaredDependency>org.glassfish.jaxb:jaxb-runtime</ignoredUnusedDeclaredDependency>
                         </ignoredUnusedDeclaredDependencies>
                     </configuration>
                     <executions>
