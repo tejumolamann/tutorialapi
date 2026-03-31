@@ -2,20 +2,19 @@ package com.tutorialapi.rest.resource;
 
 import com.tutorialapi.model.Subscription;
 import com.tutorialapi.rest.ApiApplication;
+import com.tutorialapi.rest.exception.ErrorResponse;
 import com.tutorialapi.rest.security.SecurityHeader;
 import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.glassfish.jersey.test.JerseyTest;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.logging.LogManager;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class HelloResourceIT extends JerseyTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(HelloResourceIT.class);
 
     static {
         LogManager.getLogManager().reset();
@@ -31,7 +30,13 @@ class HelloResourceIT extends JerseyTest {
         Response response = target("/test").request().get();
 
         assertEquals(401, response.getStatus());
-        assertEquals("", response.readEntity(String.class));
+        assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
+
+        ErrorResponse errorResponse = response.readEntity(ErrorResponse.class);
+        assertEquals(
+                "Missing security header: " + SecurityHeader.RAPID_API_PROXY_SECRET.getHeader(),
+                errorResponse.getMessage()
+        );
     }
 
     @Test
@@ -41,7 +46,13 @@ class HelloResourceIT extends JerseyTest {
                 .get();
 
         assertEquals(401, response.getStatus());
-        assertEquals("", response.readEntity(String.class));
+        assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
+
+        ErrorResponse errorResponse = response.readEntity(ErrorResponse.class);
+        assertEquals(
+                "Missing security header: " + SecurityHeader.RAPID_API_USER.getHeader(),
+                errorResponse.getMessage()
+        );
     }
 
     @Test
@@ -52,7 +63,13 @@ class HelloResourceIT extends JerseyTest {
                 .get();
 
         assertEquals(401, response.getStatus());
-        assertEquals("", response.readEntity(String.class));
+        assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
+
+        ErrorResponse errorResponse = response.readEntity(ErrorResponse.class);
+        assertEquals(
+                "Missing security header: " + SecurityHeader.RAPID_API_SUBSCRIPTION.getHeader(),
+                errorResponse.getMessage()
+        );
     }
 
     @Test
@@ -64,7 +81,13 @@ class HelloResourceIT extends JerseyTest {
                 .get();
 
         assertEquals(401, response.getStatus());
-        assertEquals("", response.readEntity(String.class));
+        assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
+
+        ErrorResponse errorResponse = response.readEntity(ErrorResponse.class);
+        assertEquals(
+                "Missing security header: " + SecurityHeader.RAPID_API_SUBSCRIPTION.getHeader(),
+                errorResponse.getMessage()
+        );
     }
 
     @Test
@@ -76,6 +99,7 @@ class HelloResourceIT extends JerseyTest {
                 .get();
 
         assertEquals(200, response.getStatus());
+        assertEquals(MediaType.TEXT_PLAIN_TYPE, response.getMediaType());
         assertEquals("Hello World!", response.readEntity(String.class));
 
         assertEquals("*", response.getHeaderString("Access-Control-Allow-Origin"));
