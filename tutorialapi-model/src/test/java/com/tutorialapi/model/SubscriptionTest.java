@@ -1,5 +1,6 @@
 package com.tutorialapi.model;
 
+import com.tutorialapi.model.user.Subscription;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
