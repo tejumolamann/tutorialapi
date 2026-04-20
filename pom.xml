@@ -44,10 +44,19 @@
                 <scope>import</scope>
             </dependency>
             <dependency>
+                <groupId>org.eclipse.jetty.toolchain</groupId>
+                <artifactId>jetty-jakarta-servlet-api</artifactId>
+                <version>5.0.2</version>
+            </dependency>
+            <dependency>
                 <groupId>jakarta.annotation</groupId>
                 <artifactId>jakarta.annotation-api</artifactId>
                 <version>2.1.1</version>
-                <scope>compile</scope>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.inject</groupId>
+                <artifactId>jakarta.inject-api</artifactId>
+                <version>2.0.1</version>
             </dependency>
             <dependency>
                 <groupId>org.glassfish.jersey</groupId>
@@ -161,6 +170,12 @@
                             <ignoredUnusedDeclaredDependency>org.glassfish.jersey.media:jersey-media-json-jackson</ignoredUnusedDeclaredDependency>
                             <ignoredUnusedDeclaredDependency>org.junit.jupiter:junit-jupiter</ignoredUnusedDeclaredDependency>
                         </ignoredUnusedDeclaredDependencies>
+
+                        <!-- Dependencies that explicitly used in code in tests but required for development and production -->
+                        <ignoredNonTestScopedDependencies>
+                            <ignoredNonTestScopedDependency>com.zaxxer:HikariCP::</ignoredNonTestScopedDependency>
+                            <ignoredNonTestScopedDependency>org.xerial:sqlite-jdbc::</ignoredNonTestScopedDependency>
+                        </ignoredNonTestScopedDependencies>
                     </configuration>
                     <executions>
                         <execution>
