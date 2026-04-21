@@ -43,21 +43,21 @@ public class SecurityFilter implements ContainerRequestFilter {
 
         if (proxySecret.isEmpty()) {
             throw new NotAuthorizedException(
-                    "Missing security header: " + SecurityHeader.RAPID_API_PROXY_SECRET.getHeader(),
+                    "Missing or invalid security header: " + SecurityHeader.RAPID_API_PROXY_SECRET.getHeader(),
                     Response.status(Response.Status.UNAUTHORIZED)
             );
         }
 
         if (user.isEmpty()) {
             throw new NotAuthorizedException(
-                    "Missing security header: " + SecurityHeader.RAPID_API_USER.getHeader(),
+                    "Missing or invalid security header: " + SecurityHeader.RAPID_API_USER.getHeader(),
                     Response.status(Response.Status.UNAUTHORIZED)
             );
         }
 
         if (subscription.isEmpty()) {
             throw new NotAuthorizedException(
-                    "Missing security header: " + SecurityHeader.RAPID_API_SUBSCRIPTION.getHeader(),
+                    "Missing or invalid security header: " + SecurityHeader.RAPID_API_SUBSCRIPTION.getHeader(),
                     Response.status(Response.Status.UNAUTHORIZED)
             );
         }

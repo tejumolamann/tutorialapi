@@ -1,109 +1,96 @@
 package com.tutorialapi.rest.resource.v1.lists;
 
-import com.tutorialapi.model.config.ConfigKey;
+import com.tutorialapi.db.ServiceFactory;
+import com.tutorialapi.db.service.TodoListService;
+import com.tutorialapi.model.TodoList;
+import com.tutorialapi.model.user.RapidApiPrincipal;
 import com.tutorialapi.model.user.Subscription;
 import com.tutorialapi.rest.ApiApplication;
-import com.tutorialapi.rest.exception.ErrorResponse;
+import com.tutorialapi.rest.resource.v1.BaseResourceIT;
 import com.tutorialapi.rest.security.SecurityHeader;
-import com.typesafe.config.Config;
-import com.typesafe.config.ConfigFactory;
 import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.GenericType;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.glassfish.jersey.test.JerseyTest;
 import org.junit.jupiter.api.Test;
-import org.sqlite.JDBC;
+import org.mockito.ArgumentMatchers;
+import org.mockito.Mockito;
 
-import java.util.Properties;
-import java.util.logging.LogManager;
+import java.util.Collections;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class GetAllTodoListsResourceIT extends JerseyTest {
+class GetAllTodoListsResourceIT extends BaseResourceIT {
 
-    static {
-        LogManager.getLogManager().reset();
-    }
+    private TodoListService todoListService;
 
     @Override
     protected Application configure() {
-        Properties properties = new Properties();
-        properties.setProperty(ConfigKey.DB_DRIVER.getKey(), JDBC.class.getName());
-        properties.setProperty(ConfigKey.DB_URL.getKey(), "jdbc:sqlite::memory:");
-        properties.setProperty(ConfigKey.DB_USERNAME.getKey(), "");
-        properties.setProperty(ConfigKey.DB_PASSWORD.getKey(), "");
+        ServiceFactory serviceFactory = Mockito.mock(ServiceFactory.class);
+        todoListService = Mockito.mock(TodoListService.class);
+        Mockito.when(serviceFactory.getTodoListService()).thenReturn(todoListService);
 
-        Config config = ConfigFactory.parseProperties(properties);
-        return new ApiApplication(config);
+        return new ApiApplication(serviceFactory);
     }
 
     @Test
-    void getAllTodoListsNoSecurityHeaders() {
+    void testNoSecurityHeaders() {
         Response response = target("/v1/lists").request().get();
 
-        assertEquals(401, response.getStatus());
-        assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
-
-        ErrorResponse errorResponse = response.readEntity(ErrorResponse.class);
-        assertEquals(
-                "Missing security header: " + SecurityHeader.RAPID_API_PROXY_SECRET.getHeader(),
-                errorResponse.getMessage()
+        verifyErrorResponse(
+                response,
+                Response.Status.UNAUTHORIZED.getStatusCode(),
+                "Missing or invalid security header: X-RapidAPI-Proxy-Secret"
         );
     }
 
     @Test
-    void getAllTodoListsProxySecretHeader() {
+    void testOnlyProxySecretHeader() {
         Response response = target("/v1/lists").request()
                 .header(SecurityHeader.RAPID_API_PROXY_SECRET.getHeader(), "proxy-secret")
                 .get();
 
-        assertEquals(401, response.getStatus());
-        assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
-
-        ErrorResponse errorResponse = response.readEntity(ErrorResponse.class);
-        assertEquals(
-                "Missing security header: " + SecurityHeader.RAPID_API_USER.getHeader(),
-                errorResponse.getMessage()
+        verifyErrorResponse(
+                response,
+                Response.Status.UNAUTHORIZED.getStatusCode(),
+                "Missing or invalid security header: X-RapidAPI-User"
         );
     }
 
     @Test
-    void getAllTodoListsProxySecretHeaderAndUserHeaders() {
+    void testProxySecretHeaderAndUserHeaders() {
         Response response = target("/v1/lists").request()
                 .header(SecurityHeader.RAPID_API_PROXY_SECRET.getHeader(), "proxy-secret")
                 .header(SecurityHeader.RAPID_API_USER.getHeader(), "user")
                 .get();
 
-        assertEquals(401, response.getStatus());
-        assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
-
-        ErrorResponse errorResponse = response.readEntity(ErrorResponse.class);
-        assertEquals(
-                "Missing security header: " + SecurityHeader.RAPID_API_SUBSCRIPTION.getHeader(),
-                errorResponse.getMessage()
+        verifyErrorResponse(
+                response, Response.Status.UNAUTHORIZED.getStatusCode(),
+                "Missing or invalid security header: X-RapidAPI-Subscription"
         );
     }
 
     @Test
-    void getAllTodoListsOnlyInvalidSubscription() {
+    void testInvalidSubscription() {
         Response response = target("/v1/lists").request()
                 .header(SecurityHeader.RAPID_API_PROXY_SECRET.getHeader(), "proxy-secret")
                 .header(SecurityHeader.RAPID_API_USER.getHeader(), "user")
                 .header(SecurityHeader.RAPID_API_SUBSCRIPTION.getHeader(), "invalid-subscription")
                 .get();
 
-        assertEquals(401, response.getStatus());
-        assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
-
-        ErrorResponse errorResponse = response.readEntity(ErrorResponse.class);
-        assertEquals(
-                "Missing security header: " + SecurityHeader.RAPID_API_SUBSCRIPTION.getHeader(),
-                errorResponse.getMessage()
+        verifyErrorResponse(
+                response, Response.Status.UNAUTHORIZED.getStatusCode(),
+                "Missing or invalid security header: X-RapidAPI-Subscription"
         );
     }
 
     @Test
-    void getAllTodoListsValidHeaders() {
+    void testNoTodoLists() {
+        RapidApiPrincipal principal = new RapidApiPrincipal("user", Subscription.BASIC, "proxy-secret");
+        Mockito.when(todoListService.getAll(ArgumentMatchers.eq(principal))).thenReturn(Collections.emptyList());
+
         Response response = target("/v1/lists").request()
                 .header(SecurityHeader.RAPID_API_PROXY_SECRET.getHeader(), "proxy-secret")
                 .header(SecurityHeader.RAPID_API_USER.getHeader(), "user")
@@ -113,13 +100,47 @@ class GetAllTodoListsResourceIT extends JerseyTest {
         assertEquals(200, response.getStatus());
         assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
 
-        //TODO: FIX FAILING
-//        assertEquals("Hello World!", response.readEntity(String.class));
+        List<TodoList> results = response.readEntity(new GenericType<>() {});
 
-        assertEquals("*", response.getHeaderString("Access-Control-Allow-Origin"));
-        assertEquals(
-                "GET, POST, PUT, DELETE, OPTIONS, PATCH, HEAD",
-                response.getHeaderString("Access-Control-Allow-Methods")
+        assertTrue(results.isEmpty());
+        verifyCorsHeaders(response);
+    }
+
+    @Test
+    void testSomeTodoLists() {
+        List<TodoList> lists = List.of(
+                new TodoList().setId("id1").setName("name1"), new TodoList().setId("id2").setName("name2")
         );
+
+        RapidApiPrincipal principal = new RapidApiPrincipal("user", Subscription.BASIC, "proxy-secret");
+        Mockito.when(todoListService.getAll(ArgumentMatchers.eq(principal))).thenReturn(lists);
+
+        Response response = target("/v1/lists").request()
+                .header(SecurityHeader.RAPID_API_PROXY_SECRET.getHeader(), "proxy-secret")
+                .header(SecurityHeader.RAPID_API_USER.getHeader(), "user")
+                .header(SecurityHeader.RAPID_API_SUBSCRIPTION.getHeader(), Subscription.BASIC.name())
+                .get();
+
+        assertEquals(200, response.getStatus());
+        assertEquals(MediaType.APPLICATION_JSON_TYPE, response.getMediaType());
+
+        List<TodoList> results = response.readEntity(new GenericType<>() {});
+
+        assertEquals(lists, results);
+        verifyCorsHeaders(response);
+    }
+
+    @Test
+    void testServiceException() {
+        RapidApiPrincipal principal = new RapidApiPrincipal("user", Subscription.BASIC, "proxy-secret");
+        Mockito.when(todoListService.getAll(ArgumentMatchers.eq(principal))).thenThrow(new RuntimeException("Failed"));
+
+        Response response = target("/v1/lists").request()
+                .header(SecurityHeader.RAPID_API_PROXY_SECRET.getHeader(), "proxy-secret")
+                .header(SecurityHeader.RAPID_API_USER.getHeader(), "user")
+                .header(SecurityHeader.RAPID_API_SUBSCRIPTION.getHeader(), Subscription.BASIC.name())
+                .get();
+
+        verifyErrorResponse(response, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), "Failed");
     }
 }
