@@ -33,6 +33,10 @@ public class SecurityFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext containerRequestContext) {
+        if (containerRequestContext.getUriInfo().getRequestUri().getPath().startsWith("/api/openapi")) {
+            return;
+        }
+
         Optional<String> proxySecret = getHeader(
                 containerRequestContext, SecurityHeader.RAPID_API_PROXY_SECRET.getHeader()
         );
@@ -43,14 +47,14 @@ public class SecurityFilter implements ContainerRequestFilter {
 
         if (proxySecret.isEmpty()) {
             throw new NotAuthorizedException(
-                    "Missing or invalid security header: " + SecurityHeader.RAPID_API_PROXY_SECRET.getHeader(),
+                    "Missing security header: " + SecurityHeader.RAPID_API_PROXY_SECRET.getHeader(),
                     Response.status(Response.Status.UNAUTHORIZED)
             );
         }
 
         if (user.isEmpty()) {
             throw new NotAuthorizedException(
-                    "Missing or invalid security header: " + SecurityHeader.RAPID_API_USER.getHeader(),
+                    "Missing security header: " + SecurityHeader.RAPID_API_USER.getHeader(),
                     Response.status(Response.Status.UNAUTHORIZED)
             );
         }

@@ -45,6 +45,11 @@
                     <groupId>jakarta.inject</groupId>
                     <artifactId>jakarta.inject-api</artifactId>
                 </exclusion>
+                <exclusion>
+                    <!--Dependency convergence problem, obsolete dependency-->
+                    <groupId>jakarta.el</groupId>
+                    <artifactId>jakarta.el-api</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>

@@ -42,7 +42,7 @@ class GetAllTodoListsResourceIT extends BaseResourceIT {
         verifyErrorResponse(
                 response,
                 Response.Status.UNAUTHORIZED.getStatusCode(),
-                "Missing or invalid security header: X-RapidAPI-Proxy-Secret"
+                "Missing security header: X-RapidAPI-Proxy-Secret"
         );
     }
 
@@ -55,7 +55,7 @@ class GetAllTodoListsResourceIT extends BaseResourceIT {
         verifyErrorResponse(
                 response,
                 Response.Status.UNAUTHORIZED.getStatusCode(),
-                "Missing or invalid security header: X-RapidAPI-User"
+                "Missing security header: X-RapidAPI-User"
         );
     }
 
